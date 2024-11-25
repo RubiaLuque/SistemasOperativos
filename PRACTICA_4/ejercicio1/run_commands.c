@@ -7,6 +7,59 @@
 
 #define TAM 128
 
+/** RESPUESTAS A LAS PREGUNTAS DEL EJERCICIO
+ * 
+ 1. Al usar la opción -x del programa, el comando indicado como argumento se pasa encerrado entre comillas dobles en 
+ el caso de que este, a su vez, acepte argumentos, como por ejemplo ls -l. ¿Qué ocurre si el argumento de -x no se 
+ pasa entrecomillado? ¿Funciona correctamente el lanzamiento del programa ls -l si se encierra entre comillas simples 
+ en lugar de dobles? Nota: Para ver las diferencias prueba a ejecutar el siguiente comando: echo $HOME
+ 
+ Si se ejecuta -x ls -l comprende -x ls, pero -l lo parsea como una opción al igual que lo son -x y -s. Entonces da error
+ de uso.
+ Se obtiene lo siguiente por consola:
+
+ Makefile  run_commands  run_commands.c  run_commands.o  test1  test2 --> Hace bien -x ls, pero no -l
+./run_commands: invalid option -- 'l'   --> No encuentra la opción -l en las pasadas a getopt()
+Usage: ./run_commands [-x <command>] [-s <filename>]
+
+Con entrecomillado simple puede parecer que funciona, pero en el caso de usar un comando echo, no se va a ejecutar
+correctamente:
+ 
+./run_commands -x "echo $HOME"
+/home/hlocal
+./run_commands -x 'echo $HOME'
+$HOME
+
+
+
+2. ¿Es posible utilizar execlp() en lugar de execvp() para ejecutar el comando pasado como parámetro a la función 
+launch_command() ? En caso afirmativo, indica las posibles limitaciones derivadas del uso de execlp() en este contexto.
+
+Sí. Execlp puede ejecutar una serie de comandos cuyo número es conocido en tiempo de compilación. Sin embargo,
+execvp es mejor usarla si no sabemos el número de comandos que se van a recibir para la ejecución de cada uno.
+A execlp debemos pasarle una lista de argumentos conocidos desde el principio. A execvp se le pasa un vector que se
+crea un tiempo de ejecución a medida que se van leyendo comandos. Se podrían usar ambos, pero en caso de querer cambiar
+a execlp deberíamos modificar el codigo para obtener dichos argumentos antes de pasarlos al proceso hijo.
+
+
+
+3. ¿Qué ocurre al ejecutar el comando "echo hola > a.txt" con ./run_commands -x ? ¿y con el comando 
+"cat run_commands.c | grep int" ? En caso de que los comandos no se ejecuten correctamente indica el motivo.
+
+./run_commands -x "echo hola > a.txt"
+hola > a.txt
+/run_commands -x "cat run_commands | grep int"
+--> Se imprime todo el archivo run_commands ejecutable (con sus errores de expresión de caracteres ASCII) y tras eso
+vemos que aparecen los errores:
+cat: grep: No existe el archivo o el directorio
+cat: int: No existe el archivo o el directorio
+
+En niguno de los ejemplos se ejecutan correctamente los comandos: la opcion -x parsea solo un comando y no una 
+sucesión de ellos. Tampoco parsea símbolos como > o |. y launch_command solo ejecuta el primero que se le pasa.
+ 
+ */
+
+
 pid_t launch_command(char** argv){
     
     pid_t pid; //id del proceso, es decir, identificador
