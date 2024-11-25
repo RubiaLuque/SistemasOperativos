@@ -3,6 +3,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <sys/types.h>
+#include <unistd.h> //Para getopt
+
+#define TAM 128
 
 pid_t launch_command(char** argv){
     
@@ -89,24 +92,55 @@ char **parse_command(const char *cmd, int* argc) {
 
 int main(int argc, char *argv[]) {
     char **cmd_argv;
-    int cmd_argc;
-    int i;
+    char* buffer[TAM];
 
-    if (argc != 2) {
+    if (argc <1) {
         fprintf(stderr, "Usage: %s \"command\"\n", argv[0]);
         return EXIT_FAILURE;
     }
 
-    cmd_argv=parse_command(argv[1],&cmd_argc);
+    int opt;
+    //man 3 getopt, x espera argumento asi que se ponen dos puntos. b no espera nada asi que no hace falta
+    while ((opt = getopt(argc, argv, "x:s:b")) != -1) {
+        switch (opt)
+        {
+        case 'x':
+            cmd_argv=parse_command(optarg, &optind);
+            launch_command(cmd_argv);
+            break;
 
-    launch_command(cmd_argv);
+        case 's':
+            FILE* f = fopen(optarg, "r");
 
-    // Print parsed arguments
-    printf("argc: %d\n", cmd_argc);
-    for (i = 0; cmd_argv[i] != NULL; i++) {
-        printf("argv[%d]: %s\n", i, cmd_argv[i]);
-        free(cmd_argv[i]);  // Free individual argument
+            while((fgets( buffer,sizeof(char),f))!=NULL){
+                cmd_argv=parse_command(buffer, &optind);
+                launch_command(cmd_argv);
+            }
+
+            break;
+
+        case 'b': //Parte opcional. A implementar
+            break;
+
+         default: /* '?' */
+                   fprintf(stderr, "Usage: %s [-x <command>] [-s <filename>]\n",
+                           argv[0]);
+                   exit(EXIT_FAILURE);
+        }
+        
     }
+    
+    if (optind >= argc) {
+               fprintf(stderr, "Expected argument after options\n");
+               exit(EXIT_FAILURE);
+    }
+
+    //Print parsed arguments
+    // printf("argc: %d\n", cmd_argc);
+    // for (i = 0; cmd_argv[i] != NULL; i++) {
+    //     printf("argv[%d]: %s\n", i, cmd_argv[i]);
+    //     free(cmd_argv[i]);  // Free individual argument
+    // }
 
     free(cmd_argv);  // Free the cmd_argv array
 
