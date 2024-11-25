@@ -92,28 +92,29 @@ char **parse_command(const char *cmd, int* argc) {
 
 int main(int argc, char *argv[]) {
     char **cmd_argv;
-    char* buffer[TAM];
+    char buffer[TAM]; //Tiene que ser un array de chars
 
     if (argc <1) {
         fprintf(stderr, "Usage: %s \"command\"\n", argv[0]);
         return EXIT_FAILURE;
     }
 
-    int opt;
+    int opt, parsed_argc;
     //man 3 getopt, x espera argumento asi que se ponen dos puntos. b no espera nada asi que no hace falta
     while ((opt = getopt(argc, argv, "x:s:b")) != -1) {
         switch (opt)
         {
         case 'x':
-            cmd_argv=parse_command(optarg, &optind);
+        //No se puede pasar optind a parse_command porque varía el valor de optind y el bucle no acaba nunca
+            cmd_argv=parse_command(optarg, &parsed_argc);
             launch_command(cmd_argv);
             break;
 
         case 's':
             FILE* f = fopen(optarg, "r");
 
-            while((fgets( buffer,sizeof(char),f))!=NULL){
-                cmd_argv=parse_command(buffer, &optind);
+            while((fgets( buffer,sizeof(char)*TAM,f))!=NULL){
+                cmd_argv=parse_command(buffer, &parsed_argc); //Ídem en este caso de parse_command
                 launch_command(cmd_argv);
             }
 
@@ -128,11 +129,6 @@ int main(int argc, char *argv[]) {
                    exit(EXIT_FAILURE);
         }
         
-    }
-    
-    if (optind >= argc) {
-               fprintf(stderr, "Expected argument after options\n");
-               exit(EXIT_FAILURE);
     }
 
     //Print parsed arguments
