@@ -29,6 +29,14 @@ void disco_exit(int id, int isvip)
 void *client(void *arg)
 {
 
+
+	if (isvip)
+			enter_vip_client(...);
+	else enter_normal_client(...);
+	dance(...);
+	exit_client(...);
+
+
 }
 
 int main(int argc, char *argv[])

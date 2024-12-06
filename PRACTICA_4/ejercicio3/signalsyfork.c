@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <signal.h> //Para el uso de señales
 #include <string.h> //Para el uso de strdup
-#include <sys/fcntl.h> 
+#include <sys/fcntl.h>
 #include <unistd.h>
 #include <sys/wait.h> //Para la funcion wait
 
@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 	char* arguments[argc-1]; //No es de tamaño argc-2 porque necesita que el ultimo parametro sea NULL
 
 	if(argc > 2){ //Si se han pasado argumentos del comando se obtienen
-		for(int i = 2; i<argc-1; ++i){
+		for(int i = 2; i<argc-2; ++i){
 			//strdup nos permite obtener una copia sin necesidad de saber la longitud de la palabra como strcopy
 			arguments[i] = strdup(argv[i]);
 		}
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 		//El padre es el que setea y maneja la alarma
 
 		//CONFIGURACION DE LA ACCION A REALIZAR AL RECIBIR LA SEÑAL DESEADA
-		
+
 		//struct sigaction:
 		// - handler --> funcion a ejecutar cuando se reciba la señal
 				//Dos posibilidades que no se dan a la vez:
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 		sigemptyset(&actionAlarm.sa_mask); //Se setea la mascara por defecto
 		actionAlarm.sa_flags = SA_SIGINFO | SA_RESTART; //Flags que se eligen
 		//SA_SIGINFO sirve para que devuelva mas informacion sobre la señal y SA_RESTART se usa para que
-		// el SO no dé error al interrumpir un comando. De manera que vuelve a hacer la llamada al sistema de 
+		// el SO no dé error al interrumpir un comando. De manera que vuelve a hacer la llamada al sistema de
 		// nuevo para evitar un error por interrupción.
 
 
@@ -111,13 +111,13 @@ int main(int argc, char **argv)
 		//SIGINT se suele producir cuando se hace Ctrl+c y se acaba el proceso, pero se puede sobreescribir para
 		// que realice la accion que queramos. El programa que estaba siendo ejecutado por el proceso hijo
 		// no ignora esta señal y sí se cierra abruptamente
-		
+
 		/*
 		if(sigaction(SIGINT, &actionInt, NULL)==-1){
 			perror("sigaction SIGINT\n");
 			exit(EXIT_FAILURE);
 		} */
-		
+
 		//Una vez configurado el manejo y recepcion de señales, el padre espera a que acabe el proceso hijo
 		while(child_pid !=wait(&status)); //En la variable status recibimos el motivo de cierre del proceso
 
@@ -140,7 +140,7 @@ int main(int argc, char **argv)
 	for(int i = 0; i<argc-1; ++i){
 		free(arguments[i]);
 	}
-	
+
 
 	return 0;
 }
