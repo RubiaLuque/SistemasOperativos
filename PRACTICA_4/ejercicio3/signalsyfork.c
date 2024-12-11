@@ -99,12 +99,10 @@ int main(int argc, char **argv)
 		- Si tarda menos de 5 segundos, esta señal nunca se llega a enviar y el proceso se acaba de manera natural.
 		*/
 
-		//CONFIGURACIÓN DEL ENVIO DE LA SEÑAL SIGALRM TRAS 5 SEGS
-		alarm(5);
 
 		struct sigaction actionInt;
 		//actionInt.sa_handler = sigIntHandler;
-		actionInt.sa_handler = SIG_IGN;
+		actionInt.sa_handler = SIG_IGN; //Signal ignore para que el padre no pueda acabar con CTRL+C
 		sigemptyset(&actionInt.sa_mask);
 		actionInt.sa_flags = SA_RESTART;
 
@@ -112,18 +110,18 @@ int main(int argc, char **argv)
 		// que realice la accion que queramos. El programa que estaba siendo ejecutado por el proceso hijo
 		// no ignora esta señal y sí se cierra abruptamente
 
-		/*
+
 		if(sigaction(SIGINT, &actionInt, NULL)==-1){
 			perror("sigaction SIGINT\n");
 			exit(EXIT_FAILURE);
-		} */
+		}
+
+		//CONFIGURACIÓN DEL ENVIO DE LA SEÑAL SIGALRM TRAS 5 SEGS
+		alarm(5);
 
 		//Una vez configurado el manejo y recepcion de señales, el padre espera a que acabe el proceso hijo
 		while(child_pid !=wait(&status)); //En la variable status recibimos el motivo de cierre del proceso
 
-		//----aqui ya ha acbado el proceso hijo----
-		//se cancela cualquier alarma pendiente de acabar:
-		alarm(0);
 
 		//Se comprueba el motivo de salida del proceso hijo:
 		if(WIFEXITED(status)){ //--> salida normal por exit sin error o return desde main
@@ -134,6 +132,10 @@ int main(int argc, char **argv)
 			printf("Child process %d was terminated by a signal %d.\n", child_pid, WTERMSIG(status));
 			//WTERMSIG devuelve el numero correspondiente a la señal que ha hecho acabar el proceso hijo
 		}
+
+		//----aqui ya ha acbado el proceso hijo----
+		//se cancela cualquier alarma pendiente de acabar:
+		alarm(0);
 	}
 
 
