@@ -7,7 +7,7 @@
 #define VIPSTR(vip) ((vip) ? "  vip  " : "not vip")
 
 /*
-De los apuntes de Pascal:
+De los apuntes:
 
 - Hilos (Threads): Un hilo es una unidad de ejecución dentro de un proceso. Todos los hilos de un proceso comparten
 el mismo espacio de direcciones.
