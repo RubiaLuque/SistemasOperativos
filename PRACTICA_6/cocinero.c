@@ -42,13 +42,13 @@ void cook(void)
 
 void handler(int signo)
 {
-	sem_close(empty); //Se cierran los semaforos
+	/*sem_close(empty); //Se cierran los semaforos
 	sem_close(full);
 	sem_unlink("/SEM_EMPTY"); //Se eliminan los semaforos con su nombre
 	sem_unlink("/SEM_FULL");
-	finish = 1;
 	munmap(pot, sizeof(int)); //Se desmapea la mem compartida
-	shm_unlink("/POT"); //Se elimina la memoria compartida
+	shm_unlink("/POT"); //Se elimina la memoria compartida*/
+	finish = 1;
 }
 
 int main(int argc, char *argv[])
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 	struct sigaction actions;
 	actions.sa_handler = handler;
 	sigemptyset(&actions.sa_mask);
-	actions.sa_flags = SA_RESTART;
+	actions.sa_flags = 0;
 
 	sigaction(SIGINT, &actions, NULL);
 	sigaction(SIGTERM, &actions, NULL);
@@ -85,8 +85,8 @@ int main(int argc, char *argv[])
 	//Se ejecuta el programa
 	cook();
 
-
-	//Si acaba el programa, se cierran los recursos usados
+	printf("Closing resources in cocinero.c\n");
+	// Si acaba el programa, se cierran los recursos usados
 	sem_close(empty); // Se cierran los semaforos
 	sem_close(full);
 	sem_unlink("/SEM_EMPTY"); // Se eliminan los semaforos con su nombre

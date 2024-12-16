@@ -60,7 +60,11 @@ int main(int argc, char *argv[])
 	//No hace falta darles valores a los semaforos porque ya lo hizo cocinero.c
 	full = sem_open("/SEM_FULL", 0);
 	empty = sem_open("/SEM_EMPTY", 0);
-	int shd = shm_open("/POT", O_RDWR, 0666);
+	int shd = shm_open("/POT", O_RDWR, 0);
+	if(shd == -1){
+		printf("Error in savages.c accessing shared memory\n");
+		exit(EXIT_FAILURE);
+	}
 	pot = (int*)mmap(NULL, sizeof(int), PROT_READ | PROT_WRITE, MAP_SHARED, shd, 0666);
 
 	if(empty == SEM_FAILED || full == SEM_FAILED){
@@ -74,6 +78,6 @@ int main(int argc, char *argv[])
 	sem_close(empty);
 	sem_close(full);
 	munmap(pot, sizeof(int));
-	shm_unlink("/POT"); // Se elimina la memoria compartida
+	//shm_unlink("/POT"); // Se elimina la memoria compartida, pero solo debe hacerse en cocinero.c
 	return 0;
 }
