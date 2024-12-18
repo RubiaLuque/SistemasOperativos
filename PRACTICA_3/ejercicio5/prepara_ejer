@@ -1,0 +1,157 @@
+//En vez de crear un script bash, se ha hecho por linea de comandos directamente.
+
+1. Con sudo mkdir test se ha creado un subdirectorio dentro de la capeta ejercicio5 que se llama test.
+//    Con rmdir test se elimina dicho directorio creado. Con rm -rf borra recursivamente todos los archivos
+//    y directorios con fuerza bruta (sin preguntar antes).
+
+/*
+
+2.
+Directorio: mkdir subdir
+Fichero regular: sudo touch fichero1 /subdir
+Fichero regular: sudo echo "1234567890" > subdir/fichero2
+Enlace duro: sudo ln subdir/fichero2 subdir/enlaceH
+Enlace simbolico: sudo ln -s subdir/fichero2 enlaceS
+
+3. (Solo para el subdirectorio subdir)
+
+stat -f subdir
+
+Fichero: "subdir"
+    ID: 55246a5f8cab9663 Longnombre: 255     Tipo: ext2/ext3
+Tam. bloque: 4096       Tam. bloque fundamental: 4096
+Bloques: Total: 58777328   Libres: 51846752   Disponibles: 51842656
+Nodos-i: Total: 14999552   Libres: 14524535
+
+--------------
+
+stat subdir
+
+Fichero: subdir
+  Tamaño: 4096          Bloques: 8          Bloque E/S: 4096   directorio
+Device: 259,6   Inode: 14824570    Links: 2
+Acceso: (0755/drwxr-xr-x)  Uid: ( 1000/   sigma)   Gid: ( 1000/   sigma)
+      Acceso: 2023-12-26 23:16:29.175832941 +0100
+Modificación: 2023-12-26 23:16:28.583829610 +0100
+      Cambio: 2023-12-26 23:16:28.583829610 +0100
+    Creación: 2023-12-26 23:07:19.116716372 +0100
+
+
+//RESUESTAS A LAS CUESTIONES:
+
+1.
+stat subdir/fichero1
+
+Fichero: subdir/fichero1
+  Tamaño: 0             Bloques: 0          Bloque E/S: 4096   fichero regular vacío
+Device: 259,6   Inode: 14824554    Links: 1
+Acceso: (0644/-rw-r--r--)  Uid: ( 1000/   sigma)   Gid: ( 1000/   sigma)
+      Acceso: 2023-12-26 23:15:32.811514399 +0100
+Modificación: 2023-12-26 23:08:18.949019818 +0100
+      Cambio: 2023-12-26 23:08:30.929080558 +0100
+    Creación: 2023-12-26 23:08:18.949019818 +0100
+
+El fichero1 ocupa 0 bloques y, por tanto 0 bytes.
+
+
+stat -c &b subdir/fichero2 --> Muestra solo el tamaño de bloque del archivo
+
+Fichero: subdir/fichero2
+  Tamaño: 11            Bloques: 8          Bloque E/S: 4096   fichero regular
+Device: 259,6   Inode: 14824586    Links: 2
+Acceso: (0644/-rw-r--r--)  Uid: ( 1000/   sigma)   Gid: ( 1000/   sigma)
+      Acceso: 2023-12-26 23:15:28.255488519 +0100
+Modificación: 2023-12-26 23:10:44.513827539 +0100
+      Cambio: 2023-12-26 23:15:25.379472171 +0100
+    Creación: 2023-12-26 23:10:44.501827466 +0100
+
+Usando stat -c %s subdir/fichero2 muestra el numero de bytes que ocupa el archivo: 11 bytes y 8 bloques
+
+
+
+2.
+stat subdir
+
+Fichero: subdir
+  Tamaño: 4096          Bloques: 8          Bloque E/S: 4096   directorio
+Device: 259,6   Inode: 14824570    Links: 2
+Acceso: (0755/drwxr-xr-x)  Uid: ( 1000/   sigma)   Gid: ( 1000/   sigma)
+      Acceso: 2023-12-26 23:16:29.175832941 +0100
+Modificación: 2023-12-26 23:16:28.583829610 +0100
+      Cambio: 2023-12-26 23:16:28.583829610 +0100
+    Creación: 2023-12-26 23:07:19.116716372 +0100
+
+Ocupa 8 bloques y 4096 bytes. Hay dos enlaces porque dentro de dicho directorio hay un enlace duro y
+un enlace simbolico.
+
+
+
+3.
+Sí, el fichero enlaceH y fichero2 tienen el mismo i-node:
+
+stat subdir/enlaceH
+
+ Fichero: subdir/enlaceH
+  Tamaño: 11            Bloques: 8          Bloque E/S: 4096   fichero regular
+Device: 259,6   Inode: 14824586    Links: 2
+Acceso: (0644/-rw-r--r--)  Uid: ( 1000/   sigma)   Gid: ( 1000/   sigma)
+      Acceso: 2023-12-26 23:15:28.255488519 +0100
+Modificación: 2023-12-26 23:10:44.513827539 +0100
+      Cambio: 2023-12-26 23:15:25.379472171 +0100
+    Creación: 2023-12-26 23:10:44.501827466 +0100
+
+
+4.
+cat subdir/enlaceH
+1234567890
+
+cat subdir/enlaceS
+cat: subdir/enlaceS: No existe el fichero o el directorio
+
+Sin embargo, un fichero igual pero fuera del directorio subdir, ocurre lo siguiente
+
+cat enlaceS
+1234567890
+
+rm subdir/fichero2
+
+cat enlaceS
+cat: enlaceS: No existe el fichero o el directorio
+
+cat subdir/enlaceH
+1234567890
+
+No se pueden acceder en ambos casos al contenido, solo en el caso del enlace duro.
+
+
+
+5.
+touch subdir/enlaceH --> Modifica fecha de acceso y de modificacion
+stat subdir/enlaceH
+
+  Fichero: subdir/enlaceH
+  Tamaño: 11            Bloques: 8          Bloque E/S: 4096   fichero regular
+Device: 259,6   Inode: 14824586    Links: 1
+Acceso: (0644/-rw-r--r--)  Uid: ( 1000/   sigma)   Gid: ( 1000/   sigma)
+      Acceso: 2023-12-26 23:50:48.915326913 +0100
+Modificación: 2023-12-26 23:50:48.915326913 +0100
+      Cambio: 2023-12-26 23:50:48.915326913 +0100
+    Creación: 2023-12-26 23:10:44.501827466 +0100
+
+Si usamos touch con solamente uno de los siguientes opciones -a o -m se puede cambiar solamente la
+fecha de acceso o de modificacion, respectivamente.
+
+touch -a subdir/enlaceH
+stat subdir/enlaceH
+  Fichero: subdir/enlaceH
+  Tamaño: 11            Bloques: 8          Bloque E/S: 4096   fichero regular
+Device: 259,6   Inode: 14824586    Links: 1
+Acceso: (0644/-rw-r--r--)  Uid: ( 1000/   sigma)   Gid: ( 1000/   sigma)
+      Acceso: 2023-12-26 23:54:02.680508896 +0100
+Modificación: 2023-12-26 23:50:48.915326913 +0100
+      Cambio: 2023-12-26 23:54:02.680508896 +0100
+    Creación: 2023-12-26 23:10:44.501827466 +0100
+
+Se observa que la fecha de acceso y de cambio son distintas, pero la de modificacion permanece igual.
+
+*/
