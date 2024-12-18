@@ -25,7 +25,7 @@ lrwxrwxrwx 1 usuario_local users   22 oct 17 12:38 myLink -> ../ejercicio1/Makef
 Se intenta usar el ejercicio 1 (./copy) para copiar el enlace simbolico creado:
 ../ejercicio1/copy myLink myLinkCopy
 
-Obtenemos un archivo Makefile igual al del ejercicio 1, pero al realizar cambios en el mismo, no se cambia ni en myLink ni en el Makefile original. Lo que 
+Obtenemos un archivo Makefile igual al del ejercicio 1, pero al realizar cambios en el mismo, no se cambia ni en myLink ni en el Makefile original. Lo que
 significa que solo se ha hecho una copia del contenido y no del enlace en sí. MyLinkCopy es un fichero regular
 
 */
@@ -33,7 +33,7 @@ void copy(int fdo, int fdd)
 {
 	char buffer[BLOQ];
 	int ret;
-	
+
 	while((ret = read(fdo, buffer, BLOQ)) != 0){
 		write(fdd, buffer, ret);
 	}
@@ -61,7 +61,23 @@ void copy_regular(char *orig, char *dest)
 
 void copy_link(char *orig, char *dest)
 {
+	struct stat origStat;
+	// Se reserva espacio para guardar el link que almacena el fichero apuntador
+	char *aux = (char *)malloc(origStat.st_size + 1); //+1 porque lstat no incluye el caracter terminador
 
+	// Se lee el link del fichero apuntador
+	readlink(orig, aux, sizeof(aux));
+
+	aux[origStat.st_size] = '\0'; // Se le añade a mano el caracter terminador
+
+	// Se crea un enlace simbolico al archivo apuntado por el fichero original
+	int sym = symlink(aux, dest);
+
+	if (sym < 0)
+	{
+		fprintf(stderr, "Symbolic link could not be created.\n");
+		exit(1);
+	}
 }
 
 int main(int argc, char *argv[])
