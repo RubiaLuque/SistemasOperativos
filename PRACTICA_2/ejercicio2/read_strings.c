@@ -16,12 +16,57 @@
  */
 char *loadstr(FILE *file)
 {
-	/* To be completed */
-	return NULL;	
+	int cont = 0; //Tamaño de la palabra
+
+	char c = 1;
+	while(!feof(file) && c != '\0'){
+		//Se lee byte a byte hasta que se acaba la palabra para saber su longitud
+		if(fread(&c, sizeof(char), 1, file) == 1){
+			cont++;
+		}
+	}
+
+	//Archivo vacio o final del archivo
+	if(cont == 0){
+		return NULL;
+	}
+	//Crea la variable donde se guardara la palabra a leer
+	char *string = (char *)malloc(sizeof(char) * cont);
+
+	//Comprobacion de errores
+	if(string == NULL)
+		return NULL;
+
+	//Se vuelve hacia atras el tamaño de la palabra
+	fseek(file, -sizeof(char) * cont, SEEK_CUR);
+
+	//Ahora ya sí, se lee la palabra entera
+	fread(string, sizeof(char), cont, file);
+
+	return string;
 }
 
 int main(int argc, char *argv[])
 {
-	/* To be completed */
+	if(argc < 2){
+		fprintf(stderr, "Usage: %s <file_name> <TEXT>\n", argv[0]);
+		exit(1);
+	}
+
+	FILE *file = NULL;
+	if((file=fopen(argv[1], "r+")) == NULL)
+	{
+		fprintf(stderr, "File could not be opened.\n");
+		exit(EXIT_FAILURE);
+	}
+
+	while(!feof(file)){
+		char *string = loadstr(file);
+		if(string!=NULL){
+			printf("%s\n", string);
+			free(string); //Libera la memoria asignada por malloc
+		}
+	}
+
 	return 0;
 }

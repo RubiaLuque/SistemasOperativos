@@ -20,9 +20,9 @@ int main(int argc, char* argv[])
 
 	int i = 2;
 	while(i<argc)  {
-		
+
 		//int seek = fseek(file, 0, SEEK_END); <-- No hace falta hacer esto si se abre el fichero con la opcion w+
-		
+
 		ret = fwrite(argv[i], sizeof(char), strlen(argv[i]), file);
 		if(ret <= 0){
 			perror("Error occurred.\n");
@@ -40,6 +40,8 @@ int main(int argc, char* argv[])
 
 		++i;
 	}
+
+	fclose(file);
 
 	return 0;
 }
